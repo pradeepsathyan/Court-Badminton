@@ -113,12 +113,40 @@ const Dashboard = () => {
     };
 
     const handleSetCourtCount = async (count) => {
-        const result = await updateSession(sessionId, { court_count: count });
+        // If changing count directly, reset custom numbers to use default 1,2,3...
+        const result = await updateSession(sessionId, {
+            court_count: count,
+            court_numbers: null
+        });
 
         if (result.success) {
-            setSession({ ...session, court_count: count });
+            setSession({ ...session, court_count: count, court_numbers: null });
         } else {
             alert('Error updating court count: ' + result.error);
+        }
+    };
+
+    const handleSetCourtNumbers = async (numbersString) => {
+        // Parse numbers string "5,6,7,8" -> count = 4
+        const numbers = numbersString ? numbersString.trim() : null;
+
+        let count = session.court_count;
+        if (numbers) {
+            const parts = numbers.split(',').filter(n => n.trim());
+            if (parts.length > 0) {
+                count = parts.length;
+            }
+        }
+
+        const result = await updateSession(sessionId, {
+            court_numbers: numbers,
+            court_count: count
+        });
+
+        if (result.success) {
+            setSession({ ...session, court_numbers: numbers, court_count: count });
+        } else {
+            alert('Error updating court numbers: ' + result.error);
         }
     };
 
@@ -402,6 +430,8 @@ const Dashboard = () => {
                         savedPlayers={savedPlayers}
                         courtCount={session.court_count || 1}
                         setCourtCount={handleSetCourtCount}
+                        courtNumbers={session.court_numbers || ''}
+                        setCourtNumbers={handleSetCourtNumbers}
                     />
                 </div>
 
@@ -410,6 +440,7 @@ const Dashboard = () => {
                     waitingList={waitingPlayers}
                     onComplete={handleCompleteMatch}
                     courtCount={session.court_count || 1}
+                    courtNumbers={session.court_numbers}
                     completingCourt={completingCourt}
                     onGenerate={handleGenerateMatches}
                     generating={generating}

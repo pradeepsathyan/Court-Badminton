@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getSessionBySlug, addPlayer } from '../services/api';
+import SuccessModal from '../components/SuccessModal';
 
 const Booking = () => {
     const { sessionId } = useParams(); // This is actually the slug now
@@ -10,6 +11,7 @@ const Booking = () => {
     const [category, setCategory] = useState('Intermediate');
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [modal, setModal] = useState({ isOpen: false, type: 'success', message: '', playerName: '' });
 
     useEffect(() => {
         loadSession();
@@ -22,8 +24,13 @@ const Booking = () => {
         if (result.success) {
             setSession(result.session);
         } else {
-            alert('Session not found');
-            navigate('/');
+            setModal({
+                isOpen: true,
+                type: 'error',
+                message: 'Session not found. Redirecting to home...',
+                playerName: ''
+            });
+            setTimeout(() => navigate('/'), 2000);
         }
         setLoading(false);
     };
@@ -42,15 +49,31 @@ const Booking = () => {
         });
 
         if (result.success) {
+            const bookedPlayerName = playerName.trim();
             setPlayerName('');
-            alert('Booking successful!');
+            setModal({
+                isOpen: true,
+                type: 'success',
+                message: "You're all set! See you on the court!",
+                playerName: bookedPlayerName
+            });
             // Reload session to see updated player count
             await loadSession();
         } else {
             if (result.error.includes('duplicate')) {
-                alert('Player name already taken!');
+                setModal({
+                    isOpen: true,
+                    type: 'error',
+                    message: 'This player name is already taken. Please choose a different name.',
+                    playerName: ''
+                });
             } else {
-                alert('Error: ' + result.error);
+                setModal({
+                    isOpen: true,
+                    type: 'error',
+                    message: result.error || 'Something went wrong. Please try again.',
+                    playerName: ''
+                });
             }
         }
 
@@ -177,6 +200,15 @@ const Booking = () => {
                     </div>
                 </div>
             </main>
+
+            {/* Success/Error Modal */}
+            <SuccessModal
+                isOpen={modal.isOpen}
+                onClose={() => setModal({ ...modal, isOpen: false })}
+                playerName={modal.playerName}
+                message={modal.message}
+                type={modal.type}
+            />
         </div>
     );
 };

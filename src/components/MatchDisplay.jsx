@@ -1,8 +1,19 @@
 import React from 'react';
 
-const MatchDisplay = ({ matches, waitingList, onComplete, courtCount, completingCourt, onGenerate, generating }) => {
-    // Create array of court IDs [1, 2, ..., courtCount]
-    const courts = Array.from({ length: courtCount || 0 }, (_, i) => i + 1);
+const MatchDisplay = ({ matches, waitingList, onComplete, courtCount, courtNumbers, completingCourt, onGenerate, generating }) => {
+    // Parse custom court numbers if available
+    let customCourts = [];
+    if (courtNumbers) {
+        customCourts = courtNumbers.split(',').map(n => n.trim()).filter(n => n);
+    }
+
+    // Create array of court objects { internalId: 1, displayId: "5" }
+    const courts = Array.from({ length: courtCount || 0 }, (_, i) => {
+        const internalId = i + 1;
+        // Use custom number if available at this index, otherwise default to internal ID
+        const displayId = customCourts[i] ? customCourts[i] : internalId;
+        return { internalId, displayId };
+    });
 
     return (
         <div className="match-display">
@@ -37,12 +48,12 @@ const MatchDisplay = ({ matches, waitingList, onComplete, courtCount, completing
                     )}
                 </div>
                 <div className="matches-grid">
-                    {courts.map((courtId) => {
-                        const match = matches.find(m => m.courtId === courtId);
-                        const isCompleting = completingCourt === courtId;
+                    {courts.map(({ internalId, displayId }) => {
+                        const match = matches.find(m => m.courtId === internalId);
+                        const isCompleting = completingCourt === internalId;
                         return (
-                            <div key={courtId} className="match-card" style={{ opacity: match ? 1 : 0.7, border: match ? '1px solid #ddd' : '1px dashed #ccc', padding: '0.75rem' }}>
-                                <h4 style={{ fontSize: '1rem', marginBottom: '0.5rem', marginTop: 0 }}>Court {courtId}</h4>
+                            <div key={internalId} className="match-card" style={{ opacity: match ? 1 : 0.7, border: match ? '1px solid #ddd' : '1px dashed #ccc', padding: '0.75rem' }}>
+                                <h4 style={{ fontSize: '1rem', marginBottom: '0.5rem', marginTop: 0 }}>Court {displayId}</h4>
                                 {match ? (
                                     <>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.85rem' }}>

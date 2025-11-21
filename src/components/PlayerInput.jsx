@@ -1,10 +1,23 @@
 import React, { useState } from 'react';
 
-const PlayerInput = ({ players, onAddPlayer, onRemovePlayer, onImportPlayers, savedPlayers, onSavePlayer, onImportAll, onSaveAll, courtCount, setCourtCount }) => {
+const PlayerInput = ({ players, onAddPlayer, onRemovePlayer, onImportPlayers, savedPlayers, onSavePlayer, onImportAll, onSaveAll, courtCount, setCourtCount, courtNumbers, setCourtNumbers }) => {
     const [name, setName] = useState('');
     const [category, setCategory] = useState('Intermediate');
     const [showImport, setShowImport] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
+
+    // Local state for inputs to prevent API calls on every keystroke
+    const [localCourtCount, setLocalCourtCount] = useState(courtCount);
+    const [localCourtNumbers, setLocalCourtNumbers] = useState(courtNumbers);
+
+    // Sync local state when props change
+    React.useEffect(() => {
+        setLocalCourtCount(courtCount);
+    }, [courtCount]);
+
+    React.useEffect(() => {
+        setLocalCourtNumbers(courtNumbers);
+    }, [courtNumbers]);
 
     const handleAdd = (e) => {
         e.preventDefault();
@@ -12,6 +25,24 @@ const PlayerInput = ({ players, onAddPlayer, onRemovePlayer, onImportPlayers, sa
             onAddPlayer(name, category);
             setName('');
             setCategory('Intermediate');
+        }
+    };
+
+    const handleCourtCountBlur = () => {
+        if (localCourtCount !== courtCount) {
+            setCourtCount(localCourtCount);
+        }
+    };
+
+    const handleCourtNumbersBlur = () => {
+        if (localCourtNumbers !== courtNumbers) {
+            setCourtNumbers(localCourtNumbers);
+        }
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.target.blur(); // Trigger blur to save
         }
     };
 
@@ -47,26 +78,54 @@ const PlayerInput = ({ players, onAddPlayer, onRemovePlayer, onImportPlayers, sa
                         gap: '1rem',
                         flexWrap: 'wrap'
                     }}>
-                        <label htmlFor="court-count" style={{ fontWeight: 600, color: '#2c3e50', fontSize: '0.9rem', margin: 0 }}>
-                            <i className="fas fa-layer-group" style={{ marginRight: '0.5rem' }}></i>
-                            Courts:
-                        </label>
-                        <input
-                            id="court-count"
-                            type="number"
-                            min="1"
-                            value={courtCount}
-                            onChange={(e) => setCourtCount(Math.max(1, parseInt(e.target.value) || 1))}
-                            style={{
-                                width: '70px',
-                                height: '40px',
-                                padding: '0.4rem 0.6rem',
-                                fontSize: '0.9rem',
-                                borderRadius: '6px',
-                                border: '2px solid #dee2e6',
-                                textAlign: 'center'
-                            }}
-                        />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <label htmlFor="court-count" style={{ fontWeight: 600, color: '#2c3e50', fontSize: '0.9rem', margin: 0 }}>
+                                <i className="fas fa-layer-group" style={{ marginRight: '0.5rem' }}></i>
+                                Count:
+                            </label>
+                            <input
+                                id="court-count"
+                                type="number"
+                                min="1"
+                                value={localCourtCount}
+                                onChange={(e) => setLocalCourtCount(Math.max(1, parseInt(e.target.value) || 1))}
+                                onBlur={handleCourtCountBlur}
+                                onKeyDown={handleKeyDown}
+                                style={{
+                                    width: '60px',
+                                    height: '40px',
+                                    padding: '0.4rem 0.6rem',
+                                    fontSize: '0.9rem',
+                                    borderRadius: '6px',
+                                    border: '2px solid #dee2e6',
+                                    textAlign: 'center'
+                                }}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: '1 1 150px' }}>
+                            <label htmlFor="court-numbers" style={{ fontWeight: 600, color: '#2c3e50', fontSize: '0.9rem', margin: 0, whiteSpace: 'nowrap' }}>
+                                IDs:
+                            </label>
+                            <input
+                                id="court-numbers"
+                                type="text"
+                                value={localCourtNumbers || ''}
+                                onChange={(e) => setLocalCourtNumbers(e.target.value)}
+                                onBlur={handleCourtNumbersBlur}
+                                onKeyDown={handleKeyDown}
+                                placeholder="e.g. 5, 6, 7, 8"
+                                title="Enter actual court numbers separated by commas"
+                                style={{
+                                    width: '100%',
+                                    height: '40px',
+                                    padding: '0.4rem 0.6rem',
+                                    fontSize: '0.9rem',
+                                    borderRadius: '6px',
+                                    border: '2px solid #dee2e6'
+                                }}
+                            />
+                        </div>
                     </div>
 
                     {/* Action Buttons */}
