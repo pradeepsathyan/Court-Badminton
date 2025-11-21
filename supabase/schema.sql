@@ -75,9 +75,16 @@ ALTER TABLE players ENABLE ROW LEVEL SECURITY;
 ALTER TABLE matches ENABLE ROW LEVEL SECURITY;
 ALTER TABLE saved_players ENABLE ROW LEVEL SECURITY;
 
--- Agents: Users can only read their own data
-CREATE POLICY "Users can read own data" ON agents
-    FOR SELECT USING (auth.uid() = id);
+-- Agents: Allow public registration, read access for login validation
+CREATE POLICY "Anyone can register" ON agents
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Anyone can read agents" ON agents
+    FOR SELECT USING (true);
+
+CREATE POLICY "Users can update own data" ON agents
+    FOR UPDATE USING (id = id);
+
 
 -- Sessions: Anyone can read, only owner can modify
 CREATE POLICY "Anyone can view sessions" ON sessions

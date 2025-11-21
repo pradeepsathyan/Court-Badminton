@@ -106,7 +106,10 @@ export const getSessions = async (agentId = null) => {
     try {
         let query = supabase
             .from('sessions')
-            .select('*')
+            .select(`
+                *,
+                players(count)
+            `)
             .order('created_at', { ascending: false });
 
         if (agentId) {
@@ -117,7 +120,13 @@ export const getSessions = async (agentId = null) => {
 
         if (error) throw error;
 
-        return { success: true, sessions: data };
+        // Transform data to include player_count
+        const sessionsWithCount = data.map(session => ({
+            ...session,
+            player_count: session.players?.[0]?.count || 0
+        }));
+
+        return { success: true, sessions: sessionsWithCount };
     } catch (error) {
         console.error('Get sessions error:', error);
         return { success: false, error: error.message };

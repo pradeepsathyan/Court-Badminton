@@ -271,8 +271,8 @@ const Landing = () => {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                                     <h3 style={{ margin: 0 }}>{session.agent_name}</h3>
                                     <span className="session-badge" style={{ fontSize: '0.85rem', padding: '0.4rem 0.75rem' }}>
-                                        <i className="fas fa-link"></i>
-                                        {session.shareable_slug}
+                                        <i className="fas fa-users"></i>
+                                        {session.player_count || 0} Players
                                     </span>
                                 </div>
                                 <p><strong>Court:</strong> {session.court_name}</p>
