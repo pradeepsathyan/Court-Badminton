@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { registerAgent } from '../services/api';
+import BottomNavigation from '../components/BottomNavigation';
 
 const Register = () => {
     const [fullName, setFullName] = useState('');
@@ -345,6 +346,7 @@ const Register = () => {
                     </Link>
                 </div>
             </div>
+            <BottomNavigation user={null} />
         </div>
     );
 };

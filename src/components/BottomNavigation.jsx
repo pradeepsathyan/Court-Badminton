@@ -17,7 +17,7 @@ const BottomNavigation = ({ onLogout, onCreateClick, user }) => {
         {
             label: user ? 'Create' : 'Login',
             icon: user ? 'fas fa-plus-circle' : 'fas fa-sign-in-alt',
-            path: null,
+            path: user ? null : '/login',
             action: user ? onCreateClick : () => navigate('/login')
         },
         ...(user ? [

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { loginAgent } from '../services/api';
+import BottomNavigation from '../components/BottomNavigation';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -246,6 +247,7 @@ const Login = () => {
                     </Link>
                 </div>
             </div>
+            <BottomNavigation user={null} />
         </div>
     );
 };
