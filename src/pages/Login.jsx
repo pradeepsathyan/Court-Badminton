@@ -5,6 +5,7 @@ import { loginAgent } from '../services/api';
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -17,7 +18,6 @@ const Login = () => {
         const result = await loginAgent(username, password);
 
         if (result.success) {
-            // Store user in localStorage for session persistence
             localStorage.setItem('currentUser', JSON.stringify(result.agent));
             navigate('/');
         } else {
@@ -33,243 +33,217 @@ const Login = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundImage: 'url(/login_bg.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            position: 'relative',
-            padding: '2rem'
+            backgroundColor: '#f8f9fa', // Light off-white background
+            fontFamily: "'Inter', sans-serif",
+            padding: '1rem'
         }}>
-            {/* Dark overlay */}
             <div style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'rgba(0, 0, 0, 0.4)',
-                backdropFilter: 'blur(2px)'
-            }}></div>
-
-            {/* Back to Home Button */}
-            <Link to="/" style={{
-                position: 'absolute',
-                top: '2rem',
-                left: '2rem',
-                textDecoration: 'none',
-                color: 'white',
-                fontSize: '1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                background: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(10px)',
-                padding: '0.75rem 1.5rem',
-                borderRadius: '50px',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                transition: 'all 0.3s ease',
-                zIndex: 10,
-                fontWeight: 600
-            }}
-                onMouseOver={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-                    e.currentTarget.style.transform = 'translateX(-5px)';
-                }}
-                onMouseOut={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                    e.currentTarget.style.transform = 'translateX(0)';
-                }}>
-                <i className="fas fa-arrow-left"></i>
-                Back to Home
-            </Link>
-
-            {/* Login Card */}
-            <div style={{
-                position: 'relative',
                 width: '100%',
-                maxWidth: '450px',
-                background: 'rgba(255, 255, 255, 0.95)',
-                backdropFilter: 'blur(20px)',
-                borderRadius: '24px',
-                padding: '3rem 2.5rem',
-                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3), 0 0 100px rgba(102, 126, 234, 0.2)',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                zIndex: 1
+                maxWidth: '400px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center'
             }}>
-                {/* Header */}
-                <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                    <h1 style={{
-                        fontFamily: '"Merriweather", serif',
-                        fontSize: '2.5rem',
-                        marginBottom: '0.5rem',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text',
-                        fontWeight: 800
-                    }}>
-                        Agent Login
-                    </h1>
-                    <p style={{
-                        color: '#7f8c8d',
-                        fontSize: '1rem',
-                        margin: 0
-                    }}>
-                        Manage your badminton sessions
-                    </p>
+                {/* Logo Icon */}
+                <div style={{
+                    width: '80px',
+                    height: '80px',
+                    backgroundColor: '#dcfce7', // Light green circle
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '1.5rem',
+                    color: '#22c55e',
+                    fontSize: '2rem'
+                }}>
+                    <i className="fas fa-table-tennis"></i> {/* Racket icon approximation */}
                 </div>
+
+                {/* Title */}
+                <h2 style={{
+                    fontSize: '1.25rem',
+                    fontWeight: '700',
+                    color: '#000',
+                    marginBottom: '0.5rem',
+                    textAlign: 'center'
+                }}>
+                    Badminton MS
+                </h2>
+
+                <h1 style={{
+                    fontSize: '2rem',
+                    fontWeight: '800',
+                    color: '#111',
+                    marginBottom: '2.5rem',
+                    textAlign: 'center',
+                    lineHeight: 1.2
+                }}>
+                    Log In to Your<br />Account
+                </h1>
 
                 {/* Error Message */}
                 {error && (
                     <div style={{
-                        padding: '1rem',
+                        width: '100%',
+                        padding: '0.75rem',
                         marginBottom: '1.5rem',
-                        background: 'rgba(231, 76, 60, 0.1)',
-                        border: '1px solid rgba(231, 76, 60, 0.3)',
-                        borderRadius: '12px',
-                        color: '#c0392b',
+                        backgroundColor: '#fee2e2',
+                        color: '#ef4444',
+                        borderRadius: '8px',
                         fontSize: '0.9rem',
-                        textAlign: 'center'
+                        textAlign: 'center',
+                        border: '1px solid #fca5a5'
                     }}>
                         {error}
                     </div>
                 )}
 
-                {/* Form */}
-                <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                    <div>
+                <form onSubmit={handleLogin} style={{ width: '100%' }}>
+                    {/* Email / Username Input */}
+                    <div style={{ marginBottom: '1.5rem' }}>
                         <label style={{
                             display: 'block',
                             marginBottom: '0.5rem',
-                            color: '#2c3e50',
-                            fontWeight: 600,
-                            fontSize: '0.9rem'
+                            fontWeight: '600',
+                            color: '#000',
+                            fontSize: '1rem'
                         }}>
-                            Username
+                            Email / Username
                         </label>
-                        <input
-                            type="text"
-                            placeholder="Enter your username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            required
-                            disabled={loading}
-                            style={{
-                                width: '100%',
-                                padding: '1rem 1.25rem',
-                                fontSize: '1rem',
-                                border: '2px solid #e9ecef',
-                                borderRadius: '12px',
-                                background: 'white',
-                                transition: 'all 0.3s ease',
-                                boxSizing: 'border-box',
-                                outline: 'none',
-                                opacity: loading ? 0.6 : 1
-                            }}
-                            onFocus={(e) => {
-                                e.target.style.borderColor = '#667eea';
-                                e.target.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.1)';
-                            }}
-                            onBlur={(e) => {
-                                e.target.style.borderColor = '#e9ecef';
-                                e.target.style.boxShadow = 'none';
-                            }}
-                        />
+                        <div style={{ position: 'relative' }}>
+                            <i className="fas fa-envelope" style={{
+                                position: 'absolute',
+                                left: '1rem',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                color: '#22c55e', // Green icon
+                                fontSize: '1.1rem'
+                            }}></i>
+                            <input
+                                type="text"
+                                placeholder="Enter your email or username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                required
+                                style={{
+                                    width: '100%',
+                                    padding: '1rem 1rem 1rem 3rem', // Left padding for icon
+                                    fontSize: '1rem',
+                                    border: '1px solid #e5e7eb',
+                                    borderRadius: '50px', // Rounded pill shape
+                                    backgroundColor: '#f9fafb',
+                                    outline: 'none',
+                                    color: '#374151'
+                                }}
+                            />
+                        </div>
                     </div>
 
-                    <div>
+                    {/* Password Input */}
+                    <div style={{ marginBottom: '1rem' }}>
                         <label style={{
                             display: 'block',
                             marginBottom: '0.5rem',
-                            color: '#2c3e50',
-                            fontWeight: 600,
-                            fontSize: '0.9rem'
+                            fontWeight: '600',
+                            color: '#000',
+                            fontSize: '1rem'
                         }}>
                             Password
                         </label>
-                        <input
-                            type="password"
-                            placeholder="Enter your password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            disabled={loading}
-                            style={{
-                                width: '100%',
-                                padding: '1rem 1.25rem',
-                                fontSize: '1rem',
-                                border: '2px solid #e9ecef',
-                                borderRadius: '12px',
-                                background: 'white',
-                                transition: 'all 0.3s ease',
-                                boxSizing: 'border-box',
-                                outline: 'none',
-                                opacity: loading ? 0.6 : 1
-                            }}
-                            onFocus={(e) => {
-                                e.target.style.borderColor = '#667eea';
-                                e.target.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.1)';
-                            }}
-                            onBlur={(e) => {
-                                e.target.style.borderColor = '#e9ecef';
-                                e.target.style.boxShadow = 'none';
-                            }}
-                        />
+                        <div style={{ position: 'relative' }}>
+                            <i className="fas fa-lock" style={{
+                                position: 'absolute',
+                                left: '1rem',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                color: '#22c55e', // Green icon
+                                fontSize: '1.1rem'
+                            }}></i>
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Enter your password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                style={{
+                                    width: '100%',
+                                    padding: '1rem 3rem 1rem 3rem', // Padding for both icons
+                                    fontSize: '1rem',
+                                    border: '1px solid #e5e7eb',
+                                    borderRadius: '50px', // Rounded pill shape
+                                    backgroundColor: '#f9fafb',
+                                    outline: 'none',
+                                    color: '#374151'
+                                }}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{
+                                    position: 'absolute',
+                                    right: '1rem',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: '#6b7280',
+                                    fontSize: '1.1rem'
+                                }}
+                            >
+                                <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                            </button>
+                        </div>
                     </div>
 
+                    {/* Forgot Password Link */}
+                    <div style={{ textAlign: 'right', marginBottom: '2rem' }}>
+                        <Link to="#" style={{
+                            color: '#22c55e',
+                            textDecoration: 'underline',
+                            fontSize: '0.9rem',
+                            fontWeight: '600'
+                        }}>
+                            Forgot Password?
+                        </Link>
+                    </div>
+
+                    {/* Login Button */}
                     <button
                         type="submit"
                         disabled={loading}
                         style={{
                             width: '100%',
-                            padding: '1.125rem',
+                            padding: '1rem',
                             fontSize: '1.1rem',
-                            fontWeight: 700,
+                            fontWeight: '700',
                             color: 'white',
-                            background: loading ? '#95a5a6' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            backgroundColor: '#22c55e', // Bright green
                             border: 'none',
-                            borderRadius: '12px',
+                            borderRadius: '50px',
                             cursor: loading ? 'not-allowed' : 'pointer',
-                            transition: 'all 0.3s ease',
-                            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
-                            marginTop: '0.5rem'
+                            transition: 'background-color 0.2s',
+                            marginBottom: '2rem',
+                            boxShadow: '0 4px 6px -1px rgba(34, 197, 94, 0.4)'
                         }}
-                        onMouseOver={(e) => {
-                            if (!loading) {
-                                e.target.style.background = 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)';
-                                e.target.style.transform = 'translateY(-2px)';
-                                e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.5)';
-                            }
-                        }}
-                        onMouseOut={(e) => {
-                            if (!loading) {
-                                e.target.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-                                e.target.style.transform = 'translateY(0)';
-                                e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
-                            }
-                        }}
+                        onMouseOver={(e) => !loading && (e.target.style.backgroundColor = '#16a34a')}
+                        onMouseOut={(e) => !loading && (e.target.style.backgroundColor = '#22c55e')}
                     >
                         {loading ? 'Logging in...' : 'Login'}
                     </button>
                 </form>
 
-                {/* Footer Links */}
-                <div style={{
-                    marginTop: '2rem',
-                    textAlign: 'center',
-                    paddingTop: '1.5rem',
-                    borderTop: '1px solid #e9ecef'
-                }}>
-                    <p style={{ margin: 0, color: '#7f8c8d', fontSize: '0.95rem' }}>
-                        Don't have an account?{' '}
-                        <Link to="/register" style={{
-                            color: '#667eea',
-                            textDecoration: 'none',
-                            fontWeight: 600,
-                            transition: 'color 0.3s ease'
-                        }}
-                            onMouseOver={(e) => e.target.style.color = '#764ba2'}
-                            onMouseOut={(e) => e.target.style.color = '#667eea'}>
-                            Register here
-                        </Link>
-                    </p>
+                {/* Footer */}
+                <div style={{ fontSize: '1rem', color: '#000', fontWeight: '500' }}>
+                    New to BMS?{' '}
+                    <Link to="/register" style={{
+                        color: '#22c55e',
+                        textDecoration: 'none',
+                        fontWeight: '700'
+                    }}>
+                        Sign Up
+                    </Link>
                 </div>
             </div>
         </div>
