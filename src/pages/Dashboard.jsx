@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import PlayerInput from '../components/PlayerInput';
-import CourtConfig from '../components/CourtConfig';
 import MatchDisplay from '../components/MatchDisplay';
 import {
     getSessionById,
@@ -25,6 +24,8 @@ const Dashboard = () => {
     const [matches, setMatches] = useState([]);
     const [savedPlayers, setSavedPlayers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [generating, setGenerating] = useState(false);
+    const [completingCourt, setCompletingCourt] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
@@ -122,82 +123,155 @@ const Dashboard = () => {
     };
 
     const handleCompleteMatch = async (courtId) => {
-        const matchIndex = matches.findIndex(m => m.courtId === courtId);
-        if (matchIndex === -1) return;
+        setCompletingCourt(courtId);
+        try {
+            const matchIndex = matches.findIndex(m => m.courtId === courtId);
+            if (matchIndex === -1) {
+                console.log('Match not found for court:', courtId);
+                return;
+            }
 
-        const match = matches[matchIndex];
-        const matchPlayers = [...match.team1, ...match.team2];
+            const match = matches[matchIndex];
+            const matchPlayers = [...match.team1, ...match.team2];
 
-        // Update each player's games played and waiting status
-        for (const player of matchPlayers) {
-            await updatePlayer(player.id, {
-                games_played: player.games_played + 1,
-                is_waiting: true
+            // Update each player's games played and waiting status
+            const updatePromises = matchPlayers.map(player => {
+                if (player && player.id) {
+                    const currentGamesPlayed = player.games_played || 0;
+                    return updatePlayer(player.id, {
+                        games_played: currentGamesPlayed + 1,
+                        is_waiting: true
+                    });
+                }
+                return Promise.resolve({ success: true });
             });
+
+            // Wait for all player updates
+            await Promise.all(updatePromises);
+
+            // Delete the match
+            await deleteMatch(match.id);
+
+            // Update local state immediately for smooth UX (optimistic update)
+            // Remove the completed match
+            setMatches(prevMatches => prevMatches.filter(m => m.id !== match.id));
+
+            // Update players locally
+            setPlayers(prevPlayers =>
+                prevPlayers.map(p => {
+                    const wasInMatch = matchPlayers.find(mp => mp.id === p.id);
+                    if (wasInMatch) {
+                        return {
+                            ...p,
+                            games_played: (p.games_played || 0) + 1,
+                            is_waiting: true
+                        };
+                    }
+                    return p;
+                })
+            );
+        } catch (error) {
+            console.error('Error completing match:', error);
+            alert('Error completing match: ' + error.message);
+            // Reload on error to ensure consistency
+            await loadAllData(currentUser);
+        } finally {
+            setCompletingCourt(null);
         }
-
-        // Delete the match
-        await deleteMatch(match.id);
-
-        // Reload data
-        await loadAllData(currentUser);
     };
 
     const handleGenerateMatches = async () => {
-        if (!session) return;
+        if (!session || generating) return;
+        setGenerating(true);
 
-        const courtCount = session.court_count || 1;
+        try {
+            const courtCount = session.court_count || 1;
 
-        // Find empty courts
-        const occupiedCourtIds = new Set(matches.map(m => m.courtId));
-        const emptyCourts = [];
-        for (let i = 1; i <= courtCount; i++) {
-            if (!occupiedCourtIds.has(i)) {
-                emptyCourts.push(i);
+            // Find empty courts
+            const occupiedCourtIds = new Set(matches.map(m => m.courtId));
+            const emptyCourts = [];
+            for (let i = 1; i <= courtCount; i++) {
+                if (!occupiedCourtIds.has(i)) {
+                    emptyCourts.push(i);
+                }
             }
-        }
 
-        if (emptyCourts.length === 0) {
-            alert("All courts are occupied! Complete a match first.");
-            return;
-        }
-
-        // Get available players
-        const playingIds = new Set(matches.flatMap(m => [...m.team1, ...m.team2]).map(p => p.id));
-        const availablePlayers = players.filter(p => !playingIds.has(p.id));
-
-        if (availablePlayers.length < 4) {
-            alert(`Need at least 4 available players. Currently ${availablePlayers.length} available.`);
-            return;
-        }
-
-        // Sort by games played (fairness first)
-        let sortedWaiters = [...availablePlayers].sort((a, b) => a.games_played - b.games_played);
-
-        // Generate matches for empty courts
-        for (const courtId of emptyCourts) {
-            if (sortedWaiters.length < 4) break;
-
-            const courtPlayers = sortedWaiters.splice(0, 4);
-            courtPlayers.sort(() => 0.5 - Math.random()); // Shuffle teams
-
-            // Create match in database
-            await createMatch(sessionId, {
-                court_id: courtId,
-                team1_player1_id: courtPlayers[0].id,
-                team1_player2_id: courtPlayers[1].id,
-                team2_player1_id: courtPlayers[2].id,
-                team2_player2_id: courtPlayers[3].id
-            });
-
-            // Update players' waiting status
-            for (const player of courtPlayers) {
-                await updatePlayer(player.id, { is_waiting: false });
+            if (emptyCourts.length === 0) {
+                alert("All courts are occupied! Complete a match first.");
+                setGenerating(false);
+                return;
             }
-        }
 
-        // Reload all data
-        await loadAllData(currentUser);
+            // Get available players
+            const playingIds = new Set(matches.flatMap(m => [...m.team1, ...m.team2]).map(p => p.id));
+            const availablePlayers = players.filter(p => !playingIds.has(p.id));
+
+            if (availablePlayers.length < 4) {
+                alert(`Need at least 4 available players. Currently ${availablePlayers.length} available.`);
+                setGenerating(false);
+                return;
+            }
+
+            // Sort by games played (fairness first)
+            let sortedWaiters = [...availablePlayers].sort((a, b) => a.games_played - b.games_played);
+
+            const newMatches = [];
+            const updatedPlayerIds = new Set();
+
+            // Generate matches for empty courts
+            for (const courtId of emptyCourts) {
+                if (sortedWaiters.length < 4) break;
+
+                const courtPlayers = sortedWaiters.splice(0, 4);
+                courtPlayers.sort(() => 0.5 - Math.random()); // Shuffle teams
+
+                // Create match in database
+                const matchResult = await createMatch(sessionId, {
+                    court_id: courtId,
+                    team1_player1_id: courtPlayers[0].id,
+                    team1_player2_id: courtPlayers[1].id,
+                    team2_player1_id: courtPlayers[2].id,
+                    team2_player2_id: courtPlayers[3].id
+                });
+
+                if (matchResult.success) {
+                    // Store for local state update
+                    newMatches.push({
+                        id: matchResult.match.id,
+                        courtId: courtId,
+                        team1: [courtPlayers[0], courtPlayers[1]],
+                        team2: [courtPlayers[2], courtPlayers[3]]
+                    });
+
+                    // Update players' waiting status
+                    for (const player of courtPlayers) {
+                        await updatePlayer(player.id, { is_waiting: false });
+                        updatedPlayerIds.add(player.id);
+                    }
+                }
+            }
+
+            // Update local state immediately for smooth UX (optimistic update)
+            // Add new matches
+            setMatches(prevMatches => [...prevMatches, ...newMatches]);
+
+            // Update players' waiting status locally
+            setPlayers(prevPlayers =>
+                prevPlayers.map(p => {
+                    if (updatedPlayerIds.has(p.id)) {
+                        return { ...p, is_waiting: false };
+                    }
+                    return p;
+                })
+            );
+        } catch (error) {
+            console.error('Error generating matches:', error);
+            alert('Error generating matches: ' + error.message);
+            // Reload on error to ensure consistency
+            await loadAllData(currentUser);
+        } finally {
+            setGenerating(false);
+        }
     };
 
     const handleSavePlayerToPool = async (player) => {
@@ -317,7 +391,6 @@ const Dashboard = () => {
 
             <main>
                 <div className="controls">
-                    <CourtConfig courtCount={session.court_count || 1} setCourtCount={handleSetCourtCount} />
                     <PlayerInput
                         players={players}
                         onAddPlayer={handleAddPlayer}
@@ -327,11 +400,9 @@ const Dashboard = () => {
                         onSavePlayer={handleSavePlayerToPool}
                         onSaveAll={handleSaveAllToPool}
                         savedPlayers={savedPlayers}
+                        courtCount={session.court_count || 1}
+                        setCourtCount={handleSetCourtCount}
                     />
-                    <button className="book-now-btn" onClick={handleGenerateMatches} disabled={players.length < 4} style={{ fontSize: '1rem', padding: '1rem 2rem' }}>
-                        <i className="fas fa-random" style={{ marginRight: '0.5rem' }}></i>
-                        Generate Matches
-                    </button>
                 </div>
 
                 <MatchDisplay
@@ -339,6 +410,9 @@ const Dashboard = () => {
                     waitingList={waitingPlayers}
                     onComplete={handleCompleteMatch}
                     courtCount={session.court_count || 1}
+                    completingCourt={completingCourt}
+                    onGenerate={handleGenerateMatches}
+                    generating={generating}
                 />
 
                 {/* Shareable URL Section */}

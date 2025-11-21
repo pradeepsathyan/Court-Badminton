@@ -1,16 +1,45 @@
 import React from 'react';
 
-const MatchDisplay = ({ matches, waitingList, onComplete, courtCount }) => {
+const MatchDisplay = ({ matches, waitingList, onComplete, courtCount, completingCourt, onGenerate, generating }) => {
     // Create array of court IDs [1, 2, ..., courtCount]
     const courts = Array.from({ length: courtCount || 0 }, (_, i) => i + 1);
 
     return (
         <div className="match-display">
             <div className="matches-section">
-                <h3>Current Matches</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <h3 style={{ margin: 0 }}>Current Matches</h3>
+                    {onGenerate && (
+                        <button
+                            className="book-now-btn"
+                            onClick={onGenerate}
+                            disabled={generating}
+                            style={{
+                                fontSize: '0.9rem',
+                                padding: '0.6rem 1.2rem',
+                                margin: 0,
+                                opacity: generating ? 0.6 : 1,
+                                cursor: generating ? 'not-allowed' : 'pointer'
+                            }}
+                        >
+                            {generating ? (
+                                <>
+                                    <i className="fas fa-spinner fa-spin" style={{ marginRight: '0.5rem' }}></i>
+                                    Generating...
+                                </>
+                            ) : (
+                                <>
+                                    <i className="fas fa-random" style={{ marginRight: '0.5rem' }}></i>
+                                    Generate Matches
+                                </>
+                            )}
+                        </button>
+                    )}
+                </div>
                 <div className="matches-grid">
                     {courts.map((courtId) => {
                         const match = matches.find(m => m.courtId === courtId);
+                        const isCompleting = completingCourt === courtId;
                         return (
                             <div key={courtId} className="match-card" style={{ opacity: match ? 1 : 0.7, border: match ? '1px solid #ddd' : '1px dashed #ccc', padding: '0.75rem' }}>
                                 <h4 style={{ fontSize: '1rem', marginBottom: '0.5rem', marginTop: 0 }}>Court {courtId}</h4>
@@ -44,9 +73,28 @@ const MatchDisplay = ({ matches, waitingList, onComplete, courtCount }) => {
                                         {onComplete && (
                                             <button
                                                 onClick={() => onComplete(match.courtId)}
-                                                style={{ marginTop: '0.5rem', background: '#27ae60', width: '100%', color: 'white', border: 'none', padding: '0.4rem', cursor: 'pointer', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600 }}
+                                                disabled={isCompleting}
+                                                style={{
+                                                    marginTop: '0.5rem',
+                                                    background: isCompleting ? '#95a5a6' : '#27ae60',
+                                                    width: '100%',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    padding: '0.4rem',
+                                                    cursor: isCompleting ? 'not-allowed' : 'pointer',
+                                                    borderRadius: '4px',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: 600,
+                                                    opacity: isCompleting ? 0.7 : 1
+                                                }}
                                             >
-                                                Complete
+                                                {isCompleting ? (
+                                                    <>
+                                                        <i className="fas fa-spinner fa-spin"></i> Completing...
+                                                    </>
+                                                ) : (
+                                                    'Complete'
+                                                )}
                                             </button>
                                         )}
                                     </>
@@ -108,7 +156,7 @@ const MatchDisplay = ({ matches, waitingList, onComplete, courtCount }) => {
                                 fontSize: '0.7rem',
                                 fontWeight: 'bold'
                             }}>
-                                {player.gamesPlayed}
+                                {player.games_played || 0}
                             </span>
                         </div>
                     ))}
