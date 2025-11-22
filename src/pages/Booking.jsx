@@ -332,25 +332,7 @@ const Booking = () => {
                                 </div>
                             )}
 
-                            {/* Join Button */}
-                            <button
-                                onClick={handleBook}
-                                disabled={submitting}
-                                style={{
-                                    width: '100%',
-                                    backgroundColor: '#0f172a',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '12px',
-                                    padding: '1rem',
-                                    fontSize: '1rem',
-                                    fontWeight: '700',
-                                    cursor: submitting ? 'not-allowed' : 'pointer',
-                                    opacity: submitting ? 0.7 : 1
-                                }}
-                            >
-                                {submitting ? 'Joining...' : 'Join Session'}
-                            </button>
+
                         </div>
 
                         {/* Players Preview */}
