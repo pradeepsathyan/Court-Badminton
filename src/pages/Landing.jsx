@@ -209,7 +209,7 @@ const Landing = () => {
             minHeight: '100vh',
             backgroundColor: '#f8f9fa',
             fontFamily: "'Inter', sans-serif",
-            paddingBottom: '80px' // Space for FAB and Bottom Nav
+            paddingBottom: '180px' // Space for FAB and Bottom Nav
         }}>
             {/* Header */}
             <header style={{

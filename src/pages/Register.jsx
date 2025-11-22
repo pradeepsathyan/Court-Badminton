@@ -53,7 +53,8 @@ const Register = () => {
             justifyContent: 'center',
             backgroundColor: '#f8f9fa', // Light off-white background
             fontFamily: "'Inter', sans-serif",
-            padding: '1rem'
+            padding: '1rem',
+            paddingBottom: '180px' // Space for Bottom Nav
         }}>
             <div style={{
                 width: '100%',
@@ -347,7 +348,7 @@ const Register = () => {
                 </div>
             </div>
             <BottomNavigation user={null} />
-        </div>
+        </div >
     );
 };
 

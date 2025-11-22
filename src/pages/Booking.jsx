@@ -113,7 +113,7 @@ const Booking = () => {
             minHeight: '100vh',
             backgroundColor: '#f8f9fa',
             fontFamily: "'Inter', sans-serif",
-            paddingBottom: '100px' // Space for fixed footer
+            paddingBottom: '180px' // Space for fixed footer
         }}>
             {/* Top Section Container */}
             <div style={{ paddingBottom: '0' }}>

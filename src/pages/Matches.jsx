@@ -284,7 +284,7 @@ const Matches = () => {
     }
 
     return (
-        <div style={{ minHeight: '100vh', backgroundColor: '#f5f7fa', fontFamily: "'Inter', sans-serif", paddingBottom: '2rem' }}>
+        <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa', fontFamily: "'Inter', sans-serif", paddingBottom: '180px' }}>
             {/* Header */}
             <header style={{
                 padding: '1rem 1.25rem',

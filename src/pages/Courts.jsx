@@ -94,7 +94,7 @@ const Courts = () => {
     }
 
     return (
-        <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa', fontFamily: "'Inter', sans-serif", paddingBottom: '100px' }}>
+        <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa', fontFamily: "'Inter', sans-serif", paddingBottom: '200px' }}>
             {/* Header */}
             <header style={{
                 padding: '1rem 1.25rem',

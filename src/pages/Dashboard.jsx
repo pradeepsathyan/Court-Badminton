@@ -384,7 +384,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="app-container">
+        <div className="app-container" style={{ paddingBottom: '180px' }}>
             <header style={{ position: 'relative', paddingLeft: '3rem', background: 'transparent', boxShadow: 'none' }}>
                 <button
                     onClick={() => navigate('/')}
