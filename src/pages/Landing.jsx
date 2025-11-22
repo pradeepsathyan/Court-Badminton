@@ -516,7 +516,7 @@ const Landing = () => {
                             <div style={{ width: '1.2rem' }}></div> {/* Spacer for centering */}
                         </div>
 
-                        <form onSubmit={handleCreateOrUpdateSession} style={{ padding: '1.5rem' }}>
+                        <form onSubmit={handleCreateOrUpdateSession} style={{ padding: '1.5rem', paddingBottom: '100px' }}>
                             {/* Session Details Section */}
                             <h3 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '1.5rem', color: '#1a1a1a' }}>Session Details</h3>
 
