@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Matches from './pages/Matches';
 import Courts from './pages/Courts';
+import Profile from './pages/Profile';
 import SplashScreen from './components/SplashScreen';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
         <Route path="/dashboard/:sessionId" element={<Dashboard />} />
         <Route path="/matches/:sessionId" element={<Matches />} />
         <Route path="/courts/:sessionId" element={<Courts />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>
   );

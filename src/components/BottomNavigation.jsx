@@ -25,7 +25,7 @@ const BottomNavigation = ({ onLogout, onCreateClick, user }) => {
                 label: 'Profile',
                 icon: 'fas fa-user',
                 path: '/profile',
-                action: () => { } // Dummy for now
+                action: () => navigate('/profile')
             },
             {
                 label: 'Logout',

@@ -37,7 +37,9 @@ const Landing = () => {
 
     const loadSessions = async () => {
         setLoading(true);
-        const result = await getSessions();
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        const agentId = user ? user.id : null;
+        const result = await getSessions(agentId);
         if (result.success) {
             setSessions(result.sessions);
         }

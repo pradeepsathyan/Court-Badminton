@@ -245,7 +245,9 @@ const Booking = () => {
                                     </div>
                                 </div>
                                 <div style={{ textAlign: 'right' }}>
-                                    <div style={{ color: '#0ea5e9', fontWeight: '800', fontSize: '1.4rem', marginBottom: '0.3rem' }}>AED 35</div>
+                                    <div style={{ color: '#0ea5e9', fontWeight: '800', fontSize: '1.4rem', marginBottom: '0.3rem' }}>
+                                        {session.price_per_player ? `AED ${session.price_per_player}` : 'Free'}
+                                    </div>
                                     <div style={{ color: '#0ea5e9', fontSize: '0.85rem', fontWeight: '500' }}>per player</div>
                                 </div>
                             </div>
@@ -295,9 +297,33 @@ const Booking = () => {
                             <div style={{ marginBottom: '1rem' }}>
                                 <div style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Organizer Note</div>
                                 <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: '1.5', color: '#0f172a' }}>
-                                    Session limited to {maxPlayers} players to ensure everyone gets plenty of court time. RSVP early!
+                                    {session.organizer_note || `Session limited to ${maxPlayers} players to ensure everyone gets plenty of court time. RSVP early!`}
                                 </p>
                             </div>
+
+                            {/* Map Link */}
+                            {session.location_url && (
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <div style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Location</div>
+                                    <a
+                                        href={session.location_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            color: '#2563eb',
+                                            fontSize: '0.95rem',
+                                            textDecoration: 'none',
+                                            fontWeight: '500'
+                                        }}
+                                    >
+                                        <i className="fas fa-map-marker-alt"></i>
+                                        View on Map
+                                    </a>
+                                </div>
+                            )}
                         </div>
 
                         {/* Registered Players Preview */}

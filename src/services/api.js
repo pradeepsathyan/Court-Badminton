@@ -69,6 +69,33 @@ export const loginAgent = async (username, password) => {
     }
 };
 
+// Update agent profile
+export const updateAgent = async (agentId, updates) => {
+    try {
+        // If password is being updated, hash it
+        if (updates.password) {
+            updates.password_hash = await bcrypt.hash(updates.password, 10);
+            delete updates.password;
+        }
+
+        const { data, error } = await supabase
+            .from('agents')
+            .update(updates)
+            .eq('id', agentId)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        // Don't return password hash
+        const { password_hash, ...agentData } = data;
+        return { success: true, agent: agentData };
+    } catch (error) {
+        console.error('Update agent error:', error);
+        return { success: false, error: error.message };
+    }
+};
+
 /**
  * Session Services
  */
