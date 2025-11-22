@@ -54,7 +54,7 @@ const Booking = () => {
             name: playerName.trim(),
             category: category,
             games_played: 0,
-            is_waiting: false
+            is_waiting: true
         });
 
         if (result.success) {
@@ -294,29 +294,36 @@ const Booking = () => {
                             </div>
 
                             {/* Organizer Note */}
-                            <div style={{ marginBottom: '1rem' }}>
-                                <div style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Organizer Note</div>
-                                <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: '1.5', color: '#0f172a' }}>
-                                    {session.organizer_note || `Session limited to ${maxPlayers} players to ensure everyone gets plenty of court time. RSVP early!`}
-                                </p>
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem', color: '#334155' }}>Organizer Note</label>
+                                <div style={{
+                                    backgroundColor: '#f8fafc',
+                                    padding: '1rem',
+                                    borderRadius: '12px',
+                                    border: '1px solid #e2e8f0',
+                                    color: '#475569',
+                                    fontSize: '0.95rem',
+                                    lineHeight: '1.5'
+                                }}>
+                                    {session.organizer_note || "Please arrive 10 minutes early. Bring your own racket if possible, but we have extras!"}
+                                </div>
                             </div>
 
                             {/* Map Link */}
                             {session.location_url && (
-                                <div style={{ marginBottom: '1rem' }}>
-                                    <div style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Location</div>
+                                <div style={{ marginBottom: '1.5rem' }}>
                                     <a
                                         href={session.location_url}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         style={{
-                                            display: 'inline-flex',
+                                            display: 'flex',
                                             alignItems: 'center',
                                             gap: '0.5rem',
-                                            color: '#2563eb',
-                                            fontSize: '0.95rem',
+                                            color: '#0ea5e9',
                                             textDecoration: 'none',
-                                            fontWeight: '500'
+                                            fontWeight: '600',
+                                            fontSize: '0.95rem'
                                         }}
                                     >
                                         <i className="fas fa-map-marker-alt"></i>
@@ -324,30 +331,77 @@ const Booking = () => {
                                     </a>
                                 </div>
                             )}
+
+                            {/* Join Button */}
+                            <button
+                                onClick={handleBook}
+                                disabled={submitting}
+                                style={{
+                                    width: '100%',
+                                    backgroundColor: '#0f172a',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    padding: '1rem',
+                                    fontSize: '1rem',
+                                    fontWeight: '700',
+                                    cursor: submitting ? 'not-allowed' : 'pointer',
+                                    opacity: submitting ? 0.7 : 1
+                                }}
+                            >
+                                {submitting ? 'Joining...' : 'Join Session'}
+                            </button>
                         </div>
 
-                        {/* Registered Players Preview */}
-                        <div>
-                            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '1rem' }}>Registered Players</h3>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                {players.slice(0, 5).map((player, index) => (
-                                    <div key={player.id} style={{
-                                        width: '40px',
-                                        height: '40px',
-                                        borderRadius: '50%',
-                                        backgroundColor: '#e2e8f0',
-                                        border: '2px solid white',
-                                        marginLeft: index > 0 ? '-10px' : '0',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '0.8rem',
-                                        color: '#64748b',
-                                        fontWeight: '600'
-                                    }}>
-                                        {player.name.charAt(0).toUpperCase()}
-                                    </div>
-                                ))}
+                        {/* Players Preview */}
+                        <div style={{ marginBottom: '6rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                <h3 style={{ fontSize: '1.1rem', fontWeight: '700', margin: 0, color: '#0f172a' }}>Who's Playing</h3>
+                                <button
+                                    onClick={() => setActiveTab('players')}
+                                    style={{ background: 'none', border: 'none', color: '#0ea5e9', fontWeight: '600', cursor: 'pointer', fontSize: '0.9rem' }}
+                                >
+                                    View All
+                                </button>
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                                {players.slice(0, 5).map((player, index) => {
+                                    // Generate gradient colors based on player name for abstract avatar
+                                    const gradients = [
+                                        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                        'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                                        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                                        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                                        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                                        'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
+                                        'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                                        'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+                                        'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+                                        'linear-gradient(135deg, #ff6e7f 0%, #bfe9ff 100%)'
+                                    ];
+                                    const gradientIndex = player.name.charCodeAt(0) % gradients.length;
+                                    const avatarGradient = gradients[gradientIndex];
+
+                                    return (
+                                        <div key={player.id} style={{
+                                            width: '40px',
+                                            height: '40px',
+                                            borderRadius: '50%',
+                                            background: avatarGradient,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: 'white',
+                                            fontSize: '0.9rem',
+                                            fontWeight: '700',
+                                            flexShrink: 0,
+                                            border: '2px solid white',
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                        }}>
+                                            {player.name.charAt(0).toUpperCase()}
+                                        </div>
+                                    );
+                                })}
                                 {players.length > 5 && (
                                     <div style={{
                                         width: '40px',

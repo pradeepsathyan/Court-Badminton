@@ -31,7 +31,7 @@ const Register = () => {
         }
 
         // Use Email as the username for the system
-        const result = await registerAgent(email, password);
+        const result = await registerAgent(email, password, fullName);
 
         if (result.success) {
             // Auto login - store user in localStorage

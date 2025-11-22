@@ -111,7 +111,7 @@ const Login = () => {
                             color: '#000',
                             fontSize: '1rem'
                         }}>
-                            Email / Username
+                            Username or Email
                         </label>
                         <div style={{ position: 'relative' }}>
                             <i className="fas fa-envelope" style={{

@@ -1,22 +1,21 @@
 import { supabase } from '../config/supabase';
 import bcrypt from 'bcryptjs';
 
-/**
- * Authentication Services
- */
-
 // Register a new agent
-export const registerAgent = async (username, password) => {
+export const registerAgent = async (email, password, fullName) => {
     try {
-        // Check if username already exists
+        // Check if email or username already exists
+        // We use fullName as the initial username
+        const username = fullName || email;
+
         const { data: existing } = await supabase
             .from('agents')
             .select('id')
-            .eq('username', username)
+            .or(`username.eq.${username},email.eq.${email}`)
             .single();
 
         if (existing) {
-            throw new Error('Username already exists');
+            throw new Error('Email or Username already exists');
         }
 
         // Hash password
@@ -25,7 +24,12 @@ export const registerAgent = async (username, password) => {
         // Create agent
         const { data, error } = await supabase
             .from('agents')
-            .insert([{ username, password_hash: passwordHash }])
+            .insert([{
+                username: username,
+                email: email,
+                full_name: fullName,
+                password_hash: passwordHash
+            }])
             .select()
             .single();
 
@@ -39,13 +43,13 @@ export const registerAgent = async (username, password) => {
 };
 
 // Login an agent
-export const loginAgent = async (username, password) => {
+export const loginAgent = async (identifier, password) => {
     try {
-        // Get agent by username
+        // Get agent by username or email
         const { data: agent, error } = await supabase
             .from('agents')
             .select('*')
-            .eq('username', username)
+            .or(`username.eq.${identifier},email.eq.${identifier}`)
             .single();
 
         if (error || !agent) {
@@ -78,6 +82,20 @@ export const updateAgent = async (agentId, updates) => {
             delete updates.password;
         }
 
+        // If username is being updated, check for uniqueness
+        if (updates.username) {
+            const { data: existing } = await supabase
+                .from('agents')
+                .select('id')
+                .eq('username', updates.username)
+                .neq('id', agentId) // Exclude current user
+                .single();
+
+            if (existing) {
+                throw new Error('Username already taken');
+            }
+        }
+
         const { data, error } = await supabase
             .from('agents')
             .update(updates)
@@ -92,6 +110,23 @@ export const updateAgent = async (agentId, updates) => {
         return { success: true, agent: agentData };
     } catch (error) {
         console.error('Update agent error:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+// Delete agent account
+export const deleteAgent = async (agentId) => {
+    try {
+        const { error } = await supabase
+            .from('agents')
+            .delete()
+            .eq('id', agentId);
+
+        if (error) throw error;
+
+        return { success: true };
+    } catch (error) {
+        console.error('Delete agent error:', error);
         return { success: false, error: error.message };
     }
 };
